@@ -10,12 +10,18 @@ public class UserLogin extends AbstractServer {
     @RequestUrl(url = "/loginin")
     @Override
     public void doPost(Request request, Response response)throws IOException {
-        response.writeHead("Content-Type:text/html\n");
-        response.write("\r\n");
+        response.writeHead("Content-Type:text/html");
         String name = request.getParam("name");
         String passwd = request.getParam("password");
-        String message = name + "\n" + passwd;
-        response.write(message);
+
+        SqlManager sqlManager = new SqlManager();
+        if (sqlManager.search(name,passwd)){
+            response.write("ok");
+        }else{
+            response.write("false");
+        }
+        sqlManager.close();
+
         response.flush();
         response.close();
     }

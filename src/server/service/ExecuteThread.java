@@ -2,6 +2,9 @@ package server.service;
 
 import server.AbstractServer;
 import server.EmptyServerException;
+import server.app.OnRenderListener;
+import server.app.OnRequestListener;
+import server.app.Server;
 import server.config.ConfigBean;
 import server.request.NoRequestException;
 import server.request.Request;
@@ -15,15 +18,31 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExecuteThread implements Runnable{
     private Socket socket;
     private Class<?>[] serverClasses;
     private ConfigBean configBean;
-    public ExecuteThread(Socket socket, ConfigBean configBean, Class<?>[] serverClasses){
+    private OnRequestListener listener;
+    private OnRenderListener renderListener;
+
+    private Server server = new Server();
+
+    private boolean isServer = false;
+
+    //params
+    private Map<String,String> urlParams = new HashMap<>();
+
+    public ExecuteThread(Socket socket, ConfigBean configBean, Class<?>[] serverClasses, OnRequestListener listener,OnRenderListener renderListener){
         this.socket = socket;
         this.configBean = configBean;
         this.serverClasses = serverClasses;
+        this.listener = listener;
+        this.renderListener = renderListener;
+        urlParams.clear();
     }
 
     @Override
@@ -32,7 +51,34 @@ public class ExecuteThread implements Runnable{
             InputStream in = socket.getInputStream();
             OutputStream out = socket.getOutputStream();
             final Request request = new Request(in);
+            // add a listener to listen the request;
+            request.addOnRequest(new Request.OnRequest() {
+                @Override
+                public void onStart() {
+                    server.setConnectTime(new Date().getTime());
+                    listener.onStart(server);
+                }
+
+                @Override
+                public void doRequest() {
+                    listener.doRequest(server);
+                }
+            });
+            request.doRequest();
             final Response response = new Response(out);
+            // add a listener to listen the response;
+            response.addOnResponse(new Response.OnResponse() {
+                @Override
+                public void doOnResponse() {
+                    listener.doResponse(server);
+                }
+
+                @Override
+                public void onDestroy() {
+                    listener.onDestroy(server);
+                }
+            });
+            response.setOnRenderListener(renderListener);
             dispatch(request,response); //dispatch the request
             out.close();
             in.close();
@@ -56,15 +102,21 @@ public class ExecuteThread implements Runnable{
         for (int i = 0;i < serverClasses.length;i++){
             Class newClass = serverClasses[i];
             AbstractServer server = getServerInstance(newClass,url);
+
             if (server != null){
                 try {
                     server.setTemplatesDir(configBean.getTemplatesDir());
+                    server.setParams(urlParams);
                     server.run(request,response);
                 }catch (IOException e){
                     e.printStackTrace();
                 }
+                isServer = true;
                 break;
             }
+        }
+        if (!isServer){
+
         }
 
     }
@@ -79,15 +131,16 @@ public class ExecuteThread implements Runnable{
         AbstractServer server = null;
         try {
             if (url.equals(FaviconIcoResponse.FAVICONURL)){
-                return FaviconIcoResponse.class.getDeclaredConstructor(null).newInstance();
+                return FaviconIcoResponse.class.getDeclaredConstructor(null).newInstance(null);
             }
             for(Method method: serverClass.getDeclaredMethods()){
                 RequestUrl requestUrl = method.getAnnotation(RequestUrl.class);
-
                 if (requestUrl != null){
                     String getUrl = requestUrl.url();
-                    if (url.equals(getUrl)){
-                        server = (AbstractServer) serverClass.getDeclaredConstructor(null).newInstance();
+                    if (urlParams(getUrl,url)){
+                        server = (AbstractServer) serverClass.getDeclaredConstructor(null).newInstance(null);
+                        this.server.addAbServer(server);
+                        listener.onCreate(this.server);
                     }
                     break;
                 }
@@ -96,5 +149,23 @@ public class ExecuteThread implements Runnable{
             e.printStackTrace();
         }
         return server;
+    }
+    private boolean urlParams(String url,String requestUrl){
+        String[] s = url.split("/");
+        String[] sr = requestUrl.split("/");
+        if (s.length == 0 &&  sr.length== 0) return true;
+        if (s.length != sr.length) return false;
+        for (int i = 0; i < s.length;i++){
+            String s2 = s[i].trim();
+            int start = s2.indexOf('{');
+            int end = s2.indexOf('}');
+            if (start != -1 && end != -1){
+                String params = s2.substring(start + 1,end-1).trim();
+                urlParams.put(params,sr[i]);
+            }else{
+                if (!sr[i].equals(s2)) return false;
+            }
+        }
+        return true;
     }
 }

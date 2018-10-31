@@ -10,16 +10,15 @@ public class ExecuteThreadPool {
      * @see Executors;
      */
 
-    private ExecutorService executorService = Executors.newCachedThreadPool();
+    private ExecutorService executorService;
 
 
 
-    public ExecuteThreadPool(){
-
+    public ExecuteThreadPool(int count){
+        executorService = Executors.newFixedThreadPool(count);
     }
 
     public final void addThread(Runnable runnable){
-
         executorService.submit(runnable);
     }
 }

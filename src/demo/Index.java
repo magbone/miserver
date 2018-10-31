@@ -14,12 +14,12 @@ public class Index extends AbstractServer {
     @Override
     @RequestUrl (url = "/")
     public void doGet(Request request, Response response)throws IOException {
-        response.writeHead("Content-Type:text/html\n");
-        response.write("\r\n");
+        response.writeHead("Content-Type:text/html");
         Map<String,Object> maps = new HashMap<>();
-        maps.put("name","hello");
+        System.out.println(request.getHead("Accept"));
+        maps.put("name",request.getHead("Accept"));
         maps.put("girl","my girl");
-        response.write("index.html",maps);
+        response.write("index.vm",maps);
         response.flush();
         response.close();
     }

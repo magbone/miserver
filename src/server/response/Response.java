@@ -1,23 +1,30 @@
 package server.response;
 
+import com.sun.istack.internal.NotNull;
 import server.ServerClose;
+import server.app.OnRenderListener;
 import server.response.parser.Parser;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
+
 
 public class Response implements ServerClose {
     private OutputStream out;
 
     private StringBuffer responseBuffer = new StringBuffer();
-
+    private OnRenderListener listener;
 
     private String templatesDir;
 
     //private SocketChannel socketChannel;
+
+    private OnResponse onResponse;
 
     public Response(OutputStream out){
         this.out = out;
@@ -33,31 +40,16 @@ public class Response implements ServerClose {
      * @param s
      */
     public void writeHead(String s){
-        String end = s.substring(s.length());
-        if(end.contains("\n")){
-            String s1 = s + "\n";
-            responseBuffer.append(s1);
-        }else{
-            responseBuffer.append(s);
-        }
+
+        responseBuffer.append(s + "\n");
+
 
     }
     public void write(String s){
-        String end = s.substring(s.length());
-        if (end.contains("\n")){
-            String s1 = s + "\n";
-            responseBuffer.append(s1);
-        }
-        else responseBuffer.append(s);
+         responseBuffer.append("\r\n" + s);
     }
     public void write(byte[] bytes){
-        String s = new String(bytes);
-        String end = s.substring(s.length());
-        if (end.contains("\n")){
-            String s1 = s + "\n";
-            responseBuffer.append(s1);
-        }
-        else responseBuffer.append(s);
+        responseBuffer.append("\r\n" + new String(bytes));
     }
 
     /**
@@ -65,33 +57,27 @@ public class Response implements ServerClose {
      * @param html This is relative path url;
      * @param values
      */
-    public void write(String html, Map<String,Object> values){
-        String line = null;
-        StringBuffer stringBuffer = new StringBuffer();
-        try{
-            BufferedReader in = new BufferedReader(new FileReader(templatesDir + html));
-            line = in.readLine();
-            while (line != null) {
-                if (values == null)
-                responseBuffer.append(line);
-                stringBuffer.append(line);
-                line = in.readLine();
-            }
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (values == null) return;
-        Parser parser = new Parser(stringBuffer.toString(),values);
-        responseBuffer.append(parser.toHTML());
+    public void write(@NotNull String html, Map<String,Object> values) throws IOException{
+        Parser parser = new Parser(templatesDir + html,values);
+        parser.setOnRenderListener(listener);
+        parser.doRender();
+
+        /*ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
+        gzipOutputStream.write("hello".getBytes(StandardCharsets.UTF_8));
+        //System.out.println(new String(ResponseUtil.uncompress(outputStream.toByteArray())));
+        gzipOutputStream.close();
+        */
+        responseBuffer.append("\r\n" +parser.toHTML());
     }
 
-    public void write(String html,Object o){
-
-    }
     public void flush() throws IOException{
 
         if (out == null) return;
+        this.onResponse.doOnResponse();
+
         out.write(responseBuffer.toString().getBytes());
+
         /*if (socketChannel == null) return;
         socketChannel.write(ByteBuffer.wrap(responseBuffer.toString().getBytes()));*/
     }
@@ -105,6 +91,20 @@ public class Response implements ServerClose {
     }
     @Override
     public void close() throws IOException{
+        this.onResponse.onDestroy();
         out.close();
+
+    }
+
+    public void addOnResponse(OnResponse onResponse){
+        this.onResponse = onResponse;
+    }
+    public interface OnResponse {
+        void doOnResponse();
+        void onDestroy();
+    }
+
+    public void setOnRenderListener(OnRenderListener listener){
+        this.listener = listener;
     }
 }

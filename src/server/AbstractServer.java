@@ -1,11 +1,13 @@
 package server;
 
+import server.app.Interceptor;
 import server.request.NoSuchRequestMethodException;
 import server.request.Request;
 import server.request.RequestUrl;
 import server.response.Response;
 
 import java.io.IOException;
+import java.util.Map;
 
 public abstract class AbstractServer {
 
@@ -20,6 +22,8 @@ public abstract class AbstractServer {
 
 
     private String templatesDir;
+
+    private Map<String,String> params;
     public AbstractServer(){
         super();
     }
@@ -87,7 +91,7 @@ public abstract class AbstractServer {
     public void run (Request request,Response response) throws IOException{
         String action = request.getAction();
         response.setTemplatesDir(templatesDir);
-       // System.out.println(request.toString());
+        //System.out.println(request.toString());
         switch (action){
             case POST:
                 doPost(request,response);
@@ -115,10 +119,16 @@ public abstract class AbstractServer {
                 break;
                 default:
                     throw new NoSuchRequestMethodException("no such request: " + action);
-
-
-
         }
     }
+    protected String getParams(String s){
+        return this.params.get(s);
+    }
 
+    public void setParams(Map<String,String> params){
+        this.params = params;
+    }
+    public void doInterceptor(Interceptor interceptor){
+
+    }
 }

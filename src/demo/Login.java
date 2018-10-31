@@ -12,9 +12,8 @@ public class Login extends AbstractServer {
     @RequestUrl(url = "/login")
     @Override
     public void doGet(Request request, Response response)throws IOException {
-        response.writeHead("Content-Type:text/html\n");
-        response.write("\r\n");
-        response.write("login.html",null);
+        response.writeHead("Content-Type:text/html");
+        response.write("login.vm",null);
         response.flush();
         response.close();
     }
