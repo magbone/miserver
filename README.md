@@ -7,4 +7,6 @@
 
 ## 2. Documents.
 
+[docs](https://wiki.xhi.io/miserver.html)
+
 ## 3. License.
