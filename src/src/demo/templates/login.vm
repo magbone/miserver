@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登陆</title>
+</head>
+<body>
+<form action="/loginin" method="post">
+    <label>用户名：</label><input type="text" name="name">
+    <label>密码：</label><input type="password" name="password">
+    <!--<label>文件: </label><input type="file" name="file">-->
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
