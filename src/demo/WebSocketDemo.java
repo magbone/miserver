@@ -1,11 +1,12 @@
 package demo;
 
-import server.request.RequestUrl;
+
 import server.utils.websocket.AbstractWebSocket;
 import server.utils.websocket.WebSocket;
 
+
 public class WebSocketDemo extends AbstractWebSocket {
-    @RequestUrl(url = "/chat")
+
     @Override
     public void onError(WebSocket webSocket, Exception e) {
 
@@ -18,7 +19,7 @@ public class WebSocketDemo extends AbstractWebSocket {
 
     @Override
     public void onOpen(WebSocket webSocket) {
-
+        System.out.println("open");
     }
 
     @Override

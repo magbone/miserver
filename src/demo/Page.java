@@ -9,9 +9,10 @@ import server.response.Response;
 
 import java.io.IOException;
 
+@RequestUrl(url = "/page/{ pageId }/{ homePath }")
 public class Page extends AbstractServer{
 
-    @RequestUrl(url = "/page/{ pageId }/{ homePath }")
+
     @Override
     public void doGet(Request request, Response response) throws IOException {
         response.writeHead("Content-Type:text/html");

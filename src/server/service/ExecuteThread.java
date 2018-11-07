@@ -15,8 +15,8 @@ import server.response.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Date;
 import java.util.HashMap;
@@ -127,17 +127,17 @@ public class ExecuteThread implements Runnable{
      * @param url
      * @return
      */
-    protected AbstractServer getServerInstance(Class serverClass,String url){
+    protected AbstractServer getServerInstance(Class<?> serverClass,String url){
         AbstractServer server = null;
         try {
             if (url.equals(FaviconIcoResponse.FAVICONURL)){
                 return FaviconIcoResponse.class.getDeclaredConstructor(null).newInstance(null);
             }
-            for(Method method: serverClass.getDeclaredMethods()){
-                RequestUrl requestUrl = method.getAnnotation(RequestUrl.class);
-                if (requestUrl != null){
+            for(Annotation annotation:serverClass.getDeclaredAnnotations()){
+                if (annotation instanceof RequestUrl) {
+                    RequestUrl requestUrl = (RequestUrl) annotation;
                     String getUrl = requestUrl.url();
-                    if (urlParams(getUrl,url)){
+                    if (urlParams(getUrl, url)) {
                         server = (AbstractServer) serverClass.getDeclaredConstructor(null).newInstance(null);
                         this.server.addAbServer(server);
                         listener.onCreate(this.server);

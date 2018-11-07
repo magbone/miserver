@@ -7,9 +7,8 @@ import server.response.Response;
 
 import java.io.IOException;
 
+@RequestUrl(url = "/login")
 public class Login extends AbstractServer {
-
-    @RequestUrl(url = "/login")
     @Override
     public void doGet(Request request, Response response)throws IOException {
         response.writeHead("Content-Type:text/html");

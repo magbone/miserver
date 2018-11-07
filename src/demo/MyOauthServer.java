@@ -6,9 +6,10 @@ import server.utils.oauth.OauthServer;
 
 import java.io.IOException;
 
+@RequestUrl(url = "/apis")
 public class MyOauthServer extends OauthServer {
 
-    @RequestUrl(url = "/apis")
+
     @Override
     public void oauthServer(String clientId, String responseType, String redirectUri, Response response)throws IOException {
         response.writeHead("Content-Type:text/html\n");

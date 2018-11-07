@@ -9,10 +9,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@RequestUrl (url = "/")
 public class Index extends AbstractServer {
 
     @Override
-    @RequestUrl (url = "/")
     public void doGet(Request request, Response response)throws IOException {
         response.writeHead("Content-Type:text/html");
         Map<String,Object> maps = new HashMap<>();

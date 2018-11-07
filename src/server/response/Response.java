@@ -28,7 +28,7 @@ public class Response implements ServerClose {
 
     public Response(OutputStream out){
         this.out = out;
-        this.writeHead();
+        //this.writeHead();
     }
     // This is default head
     public void writeHead(){
@@ -40,7 +40,7 @@ public class Response implements ServerClose {
      * @param s
      */
     public void writeHead(String s){
-
+        this.writeHead();
         responseBuffer.append(s + "\n");
 
 

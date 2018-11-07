@@ -9,15 +9,18 @@ import server.config.ConfigBean;
 import server.config.ConfigSyntaxException;
 import server.service.ExecuteThread;
 import server.service.ExecuteThreadPool;
+import server.utils.websocket.AbstractWebSocket;
+import server.utils.websocket.WebSocketHandler;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 
-
-public class MainApplication implements Runnable {
+public class MainApplication implements Runnable{
 
     private int port;
     private ServerSocket serverSocket;
@@ -33,6 +36,10 @@ public class MainApplication implements Runnable {
     private OnRequestListener listener;
     private OnRenderListener renderListener;
 
+    private List<? extends Object> threads = new ArrayList<>();
+
+
+
     public MainApplication(){
         this.defaultConfig();
         if (configBean == null) throw new ConfigSyntaxException("Config syntax error: No such config");
@@ -46,6 +53,7 @@ public class MainApplication implements Runnable {
     @Override
     public void run() {
         this.port = configBean.getPort();
+        //start();
         System.out.println("Server run as http://127.0.0.1:" + this.port);
         executeThreadPool = new ExecuteThreadPool(configBean.getMaxConnectCount());
         try{
@@ -64,7 +72,11 @@ public class MainApplication implements Runnable {
                 e.printStackTrace();
             }
         }
+
+
     }
+
+
     public final void setConfig(Class<? extends BaseConfig> configs){
         Annotation[] annotations = configs.getDeclaredAnnotations();
         for (Annotation annotation: annotations){
@@ -75,6 +87,16 @@ public class MainApplication implements Runnable {
             }
         }
     }
+
+    public final void addWebSocketHandler(Class<? extends AbstractWebSocket> handler, int port){
+        WebSocketHandler handler1 = new WebSocketHandler(handler,port);
+        new Thread(()->{
+            handler1.run();
+        }).start();
+        //threads.add(handler1);
+    }
+
+
 
     public void addOnRequestListener(OnRequestListener onRequestListener){
         this.listener = onRequestListener;
