@@ -1,8 +1,7 @@
 package server.utils.websocket;
 
 
-import server.utils.websocket.util.protocols.handshake.Protocols;
-import server.utils.websocket.util.protocols.websocket.Header;
+import server.utils.websocket.util.protocols.handshake.Protocol;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -65,7 +64,6 @@ public class WebSocketHandler implements Runnable{
                             SocketChannel sc = (SocketChannel)key1.channel();
                             ByteBuffer readBuffer = ByteBuffer.allocate(1024);
                             int readBytes = sc.read(readBuffer);
-
                             if (readBytes > 0){
                                 readBuffer.flip();
                                 byte[] bytes = new byte[readBuffer.remaining()];
@@ -73,7 +71,7 @@ public class WebSocketHandler implements Runnable{
                                 String body = new String(bytes);
                                 //System.out.println(body);
                                 //WebSocket Get Protocol
-                                if (Protocols.isWebSocketProtocol(body)){
+                                if (Protocol.isWebSocketProtocol(body)){
                                     WebSocketShakeHandler handler = new WebSocketShakeHandler(body,server1);
                                     byte[] bytes2 = handler.toString().getBytes();
                                     ByteBuffer writeBuffer = ByteBuffer.allocate(bytes2.length);
@@ -83,11 +81,9 @@ public class WebSocketHandler implements Runnable{
                                 }
                                 //WebSocket Protocol
                                 else{
-                                    Header header = new Header(bytes);
-                                    for (int i = 0;i < bytes.length;i++){
-                                        System.out.println(bytes[i]);
-                                    }
-                                    byte[] bytes2 = "2".toString().getBytes();
+                                    server.utils.websocket.util.protocols.websocket.Protocol protocol = new server.utils.websocket.util.protocols.websocket.Protocol(bytes);
+                                    System.out.println(protocol.getString());
+                                    byte[] bytes2 = protocol.write("helloWorldshjkdfhksdfhjkdsfhsdkjfhdkhhdskfhdkhfkd");
                                     ByteBuffer writeBuffer = ByteBuffer.allocate(bytes2.length);
                                     writeBuffer.put(bytes2);
                                     writeBuffer.flip();

@@ -1,6 +1,6 @@
 package server.utils.websocket;
 
-import server.utils.websocket.util.protocols.handshake.Protocols;
+import server.utils.websocket.util.protocols.handshake.Protocol;
 
 
 import java.util.HashMap;
@@ -60,8 +60,8 @@ public class WebSocketShakeHandler {
         }
         */
         this.version = Integer.parseInt((String) this.params.get("Sec-WebSocket-Version"));
-        Protocols protocols = new Protocols(this.params);
-        this.response = protocols.toString();
+        Protocol protocol = new Protocol(this.params);
+        this.response = protocol.toString();
         socket.onOpen(null);
 
     }
