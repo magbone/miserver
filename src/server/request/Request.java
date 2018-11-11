@@ -34,7 +34,7 @@ public class Request {
         String httpHead = httpRequest.toString().split("\n")[0];
         action = httpHead.split("\\s")[0];
         //System.out.println(action);
-        //System.out.println(httpRequest.toString());
+        System.out.println(httpRequest.toString());
         getRequestHead(httpRequest.toString());
         if (action.equals(AbstractServer.GET)){
             getGetParams(httpHead);

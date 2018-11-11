@@ -1,7 +1,12 @@
 package server.utils.websocket.util.protocols.websocket;
 
+import server.utils.websocket.AbstractWebSocket;
+import server.utils.websocket.WebSocket;
 import server.utils.websocket.util.protocols.Utils;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +43,7 @@ import java.util.List;
 
 
 
-public class Protocol {
+public class Protocol implements WebSocket{
 
     Frame frame = new Frame();
 
@@ -46,7 +51,10 @@ public class Protocol {
 
     byte[] bytes;
 
-    int cursor = 0;
+    SocketChannel sc;
+
+    AbstractWebSocket webSocket;
+
     public Protocol(byte[] bytes){
         this.bytes = bytes;
         setHeader(bytes);
@@ -69,8 +77,6 @@ public class Protocol {
             frame.setPayLoadLen((bytes[index++] << 24) + (bytes[index++] << 16) + (bytes[index++] << 8) + bytes[index++]);
         }
 
-
-        cursor = index;
 
         /**
          *
@@ -101,24 +107,95 @@ public class Protocol {
     public String getString(){
         return this.sb.toString();
     }
-    public byte[] write(String s){
+
+
+    public byte[] write(String s,int opcode ){
         byte[] bytes1 = s.getBytes();
         int len = bytes1.length;
 
         List<Byte> byteList = new ArrayList<>();
-        byteList.add((byte)((1 << 7) + 1));
+        byteList.add((byte)((opcode << 7) + 1));
 
-        // Note: there are some problems will happen,
-        // The PlayLoadLen I never consider it,
-        // As we know,The PlayLoadLen most support 64bit length data.
-        byteList.add((byte) len);
-
+        if (bytes1.length < 126)
+            byteList.add((byte) len);
+        else if (bytes1.length < 0x10000){
+            byteList.add((byte) 126);
+            byteList.add((byte) (len &0xFFF0 >> 8));
+            byteList.add((byte) (len &0xFF));
+        }else{
+            byteList.add((byte) 127);
+            byteList.add((byte) 0);
+            byteList.add((byte) 0);
+            byteList.add((byte) 0);
+            byteList.add((byte) 0);
+            byteList.add((byte) ((len & 0xFF000000) >> 24));
+            byteList.add((byte) ((len & 0xFF0000) >> 16));
+            byteList.add((byte) (len & 0xFF));
+        }
 
         byte[] bytes2 = new byte[byteList.size()];
         for (int i = 0; i < byteList.size();i++){
             bytes2[i] = byteList.get(i);
         }
         return Utils.copyByte(bytes2,bytes1);
+    }
+
+    public void setSocketChannel(SocketChannel sc){
+        this.sc = sc;
+    }
+
+    public void setServer(AbstractWebSocket wb){
+        this.webSocket = wb;
+    }
+    @Override
+    public int readyState() {
+        return 0;
+    }
+
+    @Override
+    public int version() {
+        return 0;
+    }
+
+    @Override
+    public boolean isOpen() {
+        return false;
+    }
+
+    @Override
+    public void send(String s){
+        try {
+            byte[] bytes2 = this.write(s, 0x1);
+            ByteBuffer writeBuffer = ByteBuffer.allocate(bytes2.length);
+            writeBuffer.put(bytes2);
+            writeBuffer.flip();
+            sc.write(writeBuffer);
+        }catch (IOException e){
+            webSocket.onError(this,e);
+        }
+    }
+
+    @Override
+    public boolean isClose() {
+        return false;
+    }
+
+    @Override
+    public void close() {
+        try {
+            byte[] bytes2 = this.write("", 0x8);
+            ByteBuffer writeBuffer = ByteBuffer.allocate(bytes2.length);
+            writeBuffer.put(bytes2);
+            writeBuffer.flip();
+            sc.write(writeBuffer);
+        }catch (IOException e){
+            webSocket.onError(this,e);
+        }
+    }
+
+    @Override
+    public void open() {
+
     }
 
     class Frame{

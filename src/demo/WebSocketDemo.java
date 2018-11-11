@@ -14,7 +14,8 @@ public class WebSocketDemo extends AbstractWebSocket {
 
     @Override
     public void onMessage(WebSocket webSocket, String s) {
-
+        System.out.println(s);
+        webSocket.send("hello");
     }
 
     @Override

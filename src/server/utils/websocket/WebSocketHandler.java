@@ -82,12 +82,17 @@ public class WebSocketHandler implements Runnable{
                                 //WebSocket Protocol
                                 else{
                                     server.utils.websocket.util.protocols.websocket.Protocol protocol = new server.utils.websocket.util.protocols.websocket.Protocol(bytes);
-                                    System.out.println(protocol.getString());
-                                    byte[] bytes2 = protocol.write("helloWorldshjkdfhksdfhjkdsfhsdkjfhdkhhdskfhdkhfkd");
+                                    protocol.setSocketChannel(sc);
+                                    protocol.setServer(server1);
+                                    WebSocket webSocket = protocol;
+                                    server1.onMessage(webSocket,protocol.getString());
+                                    /*
+                                    byte[] bytes2 = protocol.write("helloWorldshjkdfhksdfhjkdsfhsdkjfhdkhhdskfhdkhfkd",1);
                                     ByteBuffer writeBuffer = ByteBuffer.allocate(bytes2.length);
                                     writeBuffer.put(bytes2);
                                     writeBuffer.flip();
                                     sc.write(writeBuffer);
+                                    */
                                 }
                             }
                         }
