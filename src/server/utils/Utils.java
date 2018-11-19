@@ -56,6 +56,13 @@ public class Utils {
         return s.length() == 1 ? "0" + s : s;
     }
 
+    /**
+     *
+     * @param ss
+     * @param index
+     * @param count
+     * @return
+     */
     public static String strings2String(String[] ss,int index, int count){
        StringBuffer buffer = new StringBuffer();
        for (int i = index;i - index < count;i++){
@@ -63,4 +70,13 @@ public class Utils {
        }
        return buffer.toString();
     }
+
+    public static byte[] int2Bytes2(int a){
+        return new byte[]{(byte)((a >> 8) & 0xff),(byte)(a & 0xff)};
+    }
+
+    public static byte[] int2Bytes3(int a){
+        return new byte[]{(byte)((a >> 16) & 0xff),(byte)((a >> 8) & 0xff),(byte)(a & 0xff)};
+    }
+
 }

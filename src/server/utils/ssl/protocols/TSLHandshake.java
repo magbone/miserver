@@ -29,6 +29,13 @@ public class TSLHandshake {
     private Session session;
     private CipherSuits cipherSuits;
 
+
+    private List<Byte> byteList = new ArrayList<>();
+    //Create handshake to client
+    private TSLHandshake(){
+        byteList.clear();
+    }
+
     public TSLHandshake(String[] data,int index){
         int c = index;
         //handshake type
@@ -69,6 +76,18 @@ public class TSLHandshake {
                 break;
             case HANDSHAKETYPE_CLIENT_HELLO:
                 System.out.println("Client Hello");
+                // do server hello
+
+                TSLHandshake tslHandshake = TSLHandshake.createHandshake();
+                tslHandshake.setHandshakeType(HANDSHAKETYPE_SERVER_HELLO);
+                tslHandshake.setLength(93);
+                tslHandshake.setVersion(3,3);
+                TSLRecord tslRecord = TSLRecord.createRecord();
+                tslRecord.setContentType(TSLRecord.CONTENTTYPE_HANDSHAKE);
+                tslRecord.setProtocolVersion(3,3);
+                tslRecord.setLength(97);
+
+
                 break;
             case HANDSHAKETYPE_SERVER_HELLO:
                 // We are the server
@@ -93,14 +112,46 @@ public class TSLHandshake {
 
     }
 
-    public void setHandshakeType(int handshakeType) {
-        this.handshakeType = handshakeType;
-    }
+
 
     public int getHandshakeType() {
         return handshakeType;
     }
 
+    //Create a TSL handshake
+
+    public static TSLHandshake createHandshake(){
+        return new TSLHandshake();
+    }
+
+
+    //Set the handshake type,such as server hello
+    public void setHandshakeType(int handshakeType) {
+        this.byteList.add((byte) handshakeType);
+    }
+
+    //Set the handshake package length
+    public void setLength(int length) {
+        byte[] bytes = Utils.int2Bytes3(length);
+        for (byte b:bytes) this.byteList.add(b);
+    }
+
+    //Set the handshake version
+    public void setVersion(int a,int b){
+        this.byteList.add((byte)a);
+        this.byteList.add((byte)b);
+    }
+
+    //Set Unix time
+
+    public void setUnixtime(long unixTime){
+
+    }
+    public byte[] getBytes(){
+        byte[] bytes = new byte[this.byteList.size()];
+        for (int i = 0;i < bytes.length;i++) bytes[i] = this.byteList.get(i);
+        return bytes;
+    }
     /**
      * Random
      *
@@ -175,6 +226,31 @@ public class TSLHandshake {
         private List<String> cipherSuits = new ArrayList<>();
         private int cipherSuitsLen;
 
+        //cipher suites type
+        public final static int TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 = 0xc02c;
+        public final static int TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 = 0xc02b;
+        public final static int TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 = 0xc024;
+        public final static int TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 = 0xc023;
+        public final static int TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA = 0xc00a;
+        public final static int TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA = 0xc009;
+        public final static int TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 = 0xcca9;
+        public final static int TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 = 0xc030;
+        public final static int TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 = 0xc02f;
+        public final static int TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384 = 0xc028;
+        public final static int TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 = 0xc027;
+        public final static int TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA = 0xc014;
+        public final static int TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA = 0xc013;
+        public final static int TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 = 0xcca8;
+        public final static int TLS_RSA_WITH_AES_256_GCM_SHA384 = 0x009d;
+        public final static int TLS_RSA_WITH_AES_128_GCM_SHA256 = 0x009c;
+        public final static int TLS_RSA_WITH_AES_256_CBC_SHA256 = 0x003d;
+        public final static int TLS_RSA_WITH_AES_128_CBC_SHA256 = 0x003c;
+        public final static int TLS_RSA_WITH_AES_256_CBC_SHA = 0x0035;
+        public final static int TLS_RSA_WITH_AES_128_CBC_SHA = 0x002f;
+        public final static int TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA = 0xc008;
+        public final static int TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA = 0xc012;
+        public final static int TLS_RSA_WITH_3DES_EDE_CBC_SHA = 0x000a;
+
         public CipherSuits(){
             cipherSuits.clear();
         }
@@ -195,4 +271,7 @@ public class TSLHandshake {
             return cipherSuits;
         }
     }
+
+
+
 }

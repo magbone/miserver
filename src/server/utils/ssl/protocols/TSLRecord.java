@@ -2,7 +2,8 @@ package server.utils.ssl.protocols;
 
 import server.utils.Utils;
 
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TSLRecord {
 
@@ -25,17 +26,27 @@ public class TSLRecord {
      */
 
 
+
     private int contentType;
     private ProtocolVersion protocolVersion;
     private int length;
 
+
+    //response as TSLRecord
+    private List<Byte> bytesRe = new ArrayList<>();
+    //this constructor to createTSLRecord
+    private TSLRecord(){
+        this.bytesRe.clear();
+    }
+
+    //this constructor to getTSLRecord
     public TSLRecord(byte[] bytes){
         System.out.println(Utils.bytes2String(bytes));
         data = Utils.bytes2String(bytes).split(",");
         doRecord(data);
     }
 
-    public void doRecord(String[] data){
+    private void doRecord(String[] data){
         int index = 0;
         contentType = Integer.parseInt(data[index++],16);
         protocolVersion = new ProtocolVersion(Integer.parseInt(data[index++],16),Integer.parseInt(data[index++],16));
@@ -46,11 +57,48 @@ public class TSLRecord {
         switch (contentType){
             case CONTENTTYPE_HANDSHAKE:
                 TSLHandshake tslHandshake = new TSLHandshake(data,index);
+                break;
+            case CONTENTTYPE_ALERT:
+                break;
+            case CONTENTTYPE_APPLICATION_DATA:
+                break;
+            case CONTENTTYPE_CHANGE_CIPHER_SPEC:
+                System.out.println("22la");
+                break;
+            default:
+                break;
 
         }
 
     }
+    public static TSLRecord createRecord(){
+        return new TSLRecord();
+    }
 
+    public void setContentType(int handShake){
+        this.bytesRe.add((byte) handShake);
+    }
+
+    public void setProtocolVersion(int major,int minor){
+        this.bytesRe.add((byte) major);
+        this.bytesRe.add((byte) minor);
+    }
+
+    public void setLength(int length){
+        byte[]bytes = Utils.int2Bytes2(length);
+        for (byte b:bytes) this.bytesRe.add(b);
+    }
+
+    public void setHandshake(TSLHandshake handshake){
+        for (byte b: handshake.getBytes())
+        this.bytesRe.add(b);
+    }
+
+    public byte[] getBytes(){
+        byte[] bytes = new byte[bytesRe.size()];
+        for (int i = 0;i < bytes.length;i++) bytes[i] = bytesRe.get(i) ;
+        return bytes;
+    }
     static class ProtocolVersion{
         /***
          * TLS 1.2 major = 3 minor = 3
@@ -79,7 +127,6 @@ public class TSLRecord {
         public void setMinor(int minor) {
             this.minor = minor & 0x00ff;
         }
-
         @Override
         public String toString() {
             return "major:" + major +",minor:" + minor;

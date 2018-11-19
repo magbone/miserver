@@ -24,7 +24,7 @@ public class Socket implements Runnable {
     @Override
     public void run() {
         try{
-            System.out.println("Server run over https https://127.0..0.1:" + this.port);
+            System.out.println("Server run over https https://127.0.0.1:" + this.port);
             ServerSocketChannel channel = ServerSocketChannel.open();
             channel.socket().bind(new InetSocketAddress(this.port));
             channel.configureBlocking(false);
@@ -57,7 +57,11 @@ public class Socket implements Runnable {
                                 byte[] bytes = new byte[readBuffer.remaining()];
                                 readBuffer.get(bytes);
                                 TSLRecord record = new TSLRecord(bytes);
-
+                                byte[] bytes2 = record.getBytes();
+                                ByteBuffer writeBuffer = ByteBuffer.allocate(bytes2.length);
+                                writeBuffer.put(bytes2);
+                                writeBuffer.flip();
+                                sc.write(writeBuffer);
                             }
                         }
                     }
