@@ -2,6 +2,7 @@ package server.request;
 
 import com.sun.istack.internal.NotNull;
 import server.AbstractServer;
+import server.utils.ssl.protocols.TSLRecord;
 
 import java.io.*;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public class Request {
         String httpHead = httpRequest.toString().split("\n")[0];
         action = httpHead.split("\\s")[0];
         //System.out.println(action);
-        System.out.println(httpRequest.toString());
+        //System.out.println(httpRequest.toString());
         getRequestHead(httpRequest.toString());
         if (action.equals(AbstractServer.GET)){
             getGetParams(httpHead);
@@ -114,6 +115,7 @@ public class Request {
         if (requestHeaders.size() == 0) return null;
         return (String)requestHeaders.get(key);
     }
+
     public String getAction() {
         return action;
     }

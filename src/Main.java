@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String args[]){
         MainApplication mainApplication = new  MainApplication();
-        Class<?>[] classes = new Class<?>[]{Index.class, Login.class, GetUserInfo.class, UserLogin.class,MyOauthServer.class,Page.class};
+        Class<?>[] classes = new Class<?>[]{Index.class, Login.class, GetUserInfo.class, UserLogin.class,MyOauthServer.class,Page.class,Upload.class,UploadServer.class};
         mainApplication.setServerClasses(classes);
         mainApplication.setConfig(ServerConfig.class);
 

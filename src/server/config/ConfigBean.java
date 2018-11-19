@@ -1,5 +1,8 @@
 package server.config;
 
+import server.utils.ssl.SSL;
+import server.utils.ssl.SSLBean;
+
 import java.io.Serializable;
 
 public class ConfigBean implements Serializable {
@@ -9,11 +12,14 @@ public class ConfigBean implements Serializable {
     private int port;
     private String templatesDir;
 
-    public ConfigBean(int port,int maxConnectCount,String page404,String templatesDir){
+
+    private SSLBean sslBean;
+    public ConfigBean(int port,int maxConnectCount,String page404,String templatesDir,SSLBean sslBean){
         this.port = port;
         this.maxConnectCount = maxConnectCount;
         this.page404 = page404;
         this.templatesDir = templatesDir;
+        this.sslBean = sslBean;
     }
 
     public int getMaxConnectCount() {
@@ -46,5 +52,11 @@ public class ConfigBean implements Serializable {
 
     public void setTemplatesDir(String templatesDir) {
         this.templatesDir = templatesDir;
+    }
+
+    public void setSslBean(SSLBean sslBean){ this.sslBean = sslBean;}
+
+    public SSLBean getSslBean() {
+        return sslBean;
     }
 }

@@ -9,4 +9,7 @@ public @interface Config {
     int maxConnectCount() default 100;
     String templateDir() default "";
     String page404() default "../response/templates/404html";
+    int SSLPort() default 443;
+    boolean SSLOpen() default false;
+    boolean SSLStrict() default false;
 }

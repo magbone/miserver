@@ -16,9 +16,8 @@ public class Index extends AbstractServer {
     public void doGet(Request request, Response response)throws IOException {
         response.writeHead("Content-Type:text/html");
         Map<String,Object> maps = new HashMap<>();
-        System.out.println(request.getHead("Accept"));
-        maps.put("name",request.getHead("Accept"));
-        maps.put("girl","my girl");
+
+        maps.put("girl","sb");
         response.write("index.vm",maps);
         response.flush();
         response.close();

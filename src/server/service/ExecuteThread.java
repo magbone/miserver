@@ -11,6 +11,7 @@ import server.request.Request;
 import server.request.RequestUrl;
 import server.response.FaviconIcoResponse;
 import server.response.Response;
+import server.utils.ssl.SSLBean;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +33,8 @@ public class ExecuteThread implements Runnable{
     private Server server = new Server();
 
     private boolean isServer = false;
+
+
 
     //params
     private Map<String,String> urlParams = new HashMap<>();

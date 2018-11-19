@@ -9,6 +9,7 @@ import server.config.ConfigBean;
 import server.config.ConfigSyntaxException;
 import server.service.ExecuteThread;
 import server.service.ExecuteThreadPool;
+import server.utils.ssl.SSLBean;
 import server.utils.websocket.AbstractWebSocket;
 import server.utils.websocket.WebSocketHandler;
 
@@ -36,7 +37,7 @@ public class MainApplication implements Runnable{
     private OnRequestListener listener;
     private OnRenderListener renderListener;
 
-    private List<? extends Object> threads = new ArrayList<>();
+    private List<Runnable> threads = new ArrayList<>();
 
 
 
@@ -53,7 +54,8 @@ public class MainApplication implements Runnable{
     @Override
     public void run() {
         this.port = configBean.getPort();
-        //start();
+        //Start other handler
+        start();
         System.out.println("Server run as http://127.0.0.1:" + this.port);
         executeThreadPool = new ExecuteThreadPool(configBean.getMaxConnectCount());
         try{
@@ -82,7 +84,8 @@ public class MainApplication implements Runnable{
         for (Annotation annotation: annotations){
             if (annotation instanceof Config){
                 Config config = (Config)annotation;
-                configBean = new ConfigBean(config.port(),config.maxConnectCount(),config.page404(),config.templateDir());
+                configBean = new ConfigBean(config.port(),config.maxConnectCount(),config.page404(),config.templateDir(),new SSLBean(config.SSLOpen(),config.SSLStrict(), config.SSLPort()));
+                if (configBean.getSslBean().isOpen())threads.add(new server.utils.ssl.Socket(configBean.getSslBean()));
                 break;
             }
         }
@@ -90,12 +93,22 @@ public class MainApplication implements Runnable{
 
     public final void addWebSocketHandler(Class<? extends AbstractWebSocket> handler, int port){
         WebSocketHandler handler1 = new WebSocketHandler(handler,port);
+        /*
         new Thread(()->{
             handler1.run();
         }).start();
-        //threads.add(handler1);
+        */
+        threads.add(handler1);
     }
 
+    private synchronized void start(){
+        for (Runnable r:threads){
+            new Thread(()->{
+                r.run();
+            }).start();
+
+        }
+    }
 
 
     public void addOnRequestListener(OnRequestListener onRequestListener){
@@ -112,7 +125,8 @@ public class MainApplication implements Runnable{
             for (Annotation annotation : annotations){
                 if (annotation instanceof Config){
                     Config config = (Config)annotation;
-                    configBean = new ConfigBean(config.port(),config.maxConnectCount(),config.page404(),config.templateDir());
+                    configBean = new ConfigBean(config.port(),config.maxConnectCount(),config.page404(),config.templateDir(),new SSLBean(config.SSLOpen(),config.SSLStrict(),config.SSLPort()));
+                    if (configBean.getSslBean().isOpen())threads.add(new server.utils.ssl.Socket(configBean.getSslBean()));
                     break;
                 }
             }
