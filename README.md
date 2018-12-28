@@ -99,4 +99,4 @@ public class Main {
 Type the http://localhost:8080 in your browser address input, and the you will see the <code>hello</code> printed in screen.
   
 ## 3. License.
-  [IT License](LICENSE)
+  [MIT License](LICENSE)
