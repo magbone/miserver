@@ -42,7 +42,7 @@ We need some depentdent jars. Please make sure they are in your projects.
 
 #### 2.2.2 Start new project.
 
- Create a new project with above jar packages.The <code> Demo.java </code> as follows.
+ Create a new project with above jar packages. The <code> Demo.java </code> as follows.
  
  ```java
  
@@ -96,7 +96,7 @@ public class Main {
 
 #### 2.2.3 Run the application
 
-Type the http://localhost:8080 in your browser address input, and the you will see the <code>hello</code> printed in screen.
+Type the http://localhost:8080 in your browser address input, and then you will see the <code>hello</code> printed in screen.
   
 ## 3. License.
   [MIT License](LICENSE)
