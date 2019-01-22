@@ -1,6 +1,6 @@
 package server.utils.ssl;
 
-import server.utils.ssl.protocols.TSLRecord;
+import server.utils.ssl.protocols.record.TSLRecord;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -24,7 +24,7 @@ public class Socket implements Runnable {
     @Override
     public void run() {
         try{
-            System.out.println("Server run over https https://127.0.0.1:" + this.port);
+            System.out.println("Server run over https, https://127.0.0.1:" + this.port);
             ServerSocketChannel channel = ServerSocketChannel.open();
             channel.socket().bind(new InetSocketAddress(this.port));
             channel.configureBlocking(false);
